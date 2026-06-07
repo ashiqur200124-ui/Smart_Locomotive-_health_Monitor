@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Locomotive Health Monitor</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-train"></i> Smart Locomotive Health Monitor</h1>
+                <div class="header-status">
+                    <span class="system-status active" id="systemStatus">● System Active</span>
+                    <span class="timestamp" id="timestamp"></span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="navbar">
+            <ul class="nav-menu">
+                <li><a href="#dashboard" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#locomotives" class="nav-link" data-section="locomotives">Locomotives</a></li>
+                <li><a href="#analysis" class="nav-link" data-section="analysis">Analysis</a></li>
+                <li><a href="#map-section" class="nav-link" data-section="map-section">Railway Map</a></li>
+                <li><a href="#alerts" class="nav-link" data-section="alerts">Alerts</a></li>
+                <li><a href="#maintenance" class="nav-link" data-section="maintenance">Maintenance</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="section active">
+                <h2>System Dashboard</h2>
+                
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-train"></i></div>
+                        <h3>Active Locomotives</h3>
+                        <p class="metric-value" id="activeLoco">0</p>
+                        <p class="metric-description">Currently monitored</p>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon alert-high"><i class="fas fa-exclamation-triangle"></i></div>
+                        <h3>Critical Alerts</h3>
+                        <p class="metric-value alert-high" id="criticalAlerts">0</p>
+                        <p class="metric-description">Requires attention</p>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-heartbeat"></i></div>
+                        <h3>Average Health</h3>
+                        <p class="metric-value" id="avgHealth">85%</p>
+                        <p class="metric-description">Fleet health score</p>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-tools"></i></div>
+                        <h3>Maintenance Due</h3>
+                        <p class="metric-value" id="maintenanceDue">0</p>
+                        <p class="metric-description">Within 48 hours</p>
+                    </div>
+                </div>
+
+                <!-- Risk Distribution Chart -->
+                <div class="chart-container">
+                    <h3>Risk Distribution</h3>
+                    <div id="riskChart" class="chart"></div>
+                </div>
+
+                <!-- System Health Gauge -->
+                <div class="chart-container">
+                    <h3>System Health Status</h3>
+                    <div id="healthGauge" class="chart"></div>
+                </div>
+            </section>
+
+            <!-- Locomotives Section -->
+            <section id="locomotives" class="section">
+                <h2>Fleet Management</h2>
+                
+                <div class="filter-bar">
+                    <input type="text" id="searchLocos" placeholder="Search locomotives..." class="search-input">
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="MAINTENANCE">Maintenance</option>
+                        <option value="INACTIVE">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="locomotives-table-wrapper">
+                    <table class="locomotives-table" id="locosTable">
+                        <thead>
+                            <tr>
+                                <th>Locomotive ID</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Route</th>
+                                <th>Mileage</th>
+                                <th>Health</th>
+                                <th>Status</th>
+                                <th>Risk Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="locosTableBody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Analysis Section -->
+            <section id="analysis" class="section">
+                <h2>Health Analysis</h2>
+                
+                <div class="form-container">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Locomotive ID</label>
+                            <input type="text" id="analyzeLocoId" placeholder="e.g., BR1001" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Temperature (°C)</label>
+                            <input type="number" id="tempInput" min="-10" max="200" value="85" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Vibration (mm/s)</label>
+                            <input type="number" id="vibrationInput" min="0" max="50" value="5" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Pressure (kPa)</label>
+                            <input type="number" id="pressureInput" min="0" max="500" value="150" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Oil Quality (0-100)</label>
+                            <input type="number" id="oilQualityInput" min="0" max="100" value="25" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Mileage (km)</label>
+                            <input type="number" id="mileageInput" min="0" max="1000000" value="150000" class="form-input">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Latitude</label>
+                            <input type="number" id="latInput" step="0.0001" value="23.7275" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Longitude</label>
+                            <input type="number" id="lonInput" step="0.0001" value="90.4086" class="form-input">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="performAnalysis()">Analyze Locomotive Health</button>
+                </div>
+
+                <!-- Analysis Results -->
+                <div id="analysisResults" class="analysis-results" style="display: none;">
+                    <h3>Analysis Results</h3>
+                    
+                    <div class="results-grid">
+                        <div class="result-card">
+                            <h4>Risk Score</h4>
+                            <p id="riskScoreResult" class="result-value"></p>
+                            <p id="riskCategoryResult" class="result-category"></p>
+                        </div>
+                        <div class="result-card">
+                            <h4>Health Score</h4>
+                            <p id="healthScoreResult" class="result-value"></p>
+                        </div>
+                        <div class="result-card">
+                            <h4>Reliability</h4>
+                            <p id="reliabilityResult" class="result-value"></p>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <h4>Component Risk Analysis</h4>
+                        <div id="componentRiskChart" class="chart"></div>
+                    </div>
+
+                    <div class="chart-container">
+                        <h4>Failure Probability by Component</h4>
+                        <div id="failureProbChart" class="chart"></div>
+                    </div>
+
+                    <div class="recommendations-box">
+                        <h4><i class="fas fa-lightbulb"></i> Recommendations</h4>
+                        <ul id="recommendationsList"></ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Railway Map Section -->
+            <section id="map-section" class="section">
+                <h2>Railway Network & Locomotive Position</h2>
+                
+                <div class="map-controls">
+                    <button class="btn btn-small" onclick="toggleAnimatedMode()">
+                        <i class="fas fa-play"></i> Start Animation
+                    </button>
+                    <button class="btn btn-small" onclick="resetMap()">
+                        <i class="fas fa-sync"></i> Reset
+                    </button>
+                </div>
+
+                <div id="map" class="railway-map"></div>
+                
+                <div class="map-legend">
+                    <h4>Legend</h4>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #4CAF50;"></span>
+                        <span>Locomotive (Healthy)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #FF9800;"></span>
+                        <span>Locomotive (At Risk)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #F44336;"></span>
+                        <span>Locomotive (Critical)</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #2196F3;"></span>
+                        <span>Junction/Station</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-dot" style="background-color: #9C27B0;"></span>
+                        <span>Locomotive Shed</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Alerts Section -->
+            <section id="alerts" class="section">
+                <h2>Active Alerts</h2>
+                
+                <div class="filter-bar">
+                    <select id="alertSeverityFilter" class="filter-select" onchange="filterAlerts()">
+                        <option value="">All Severities</option>
+                        <option value="EMERGENCY">Emergency</option>
+                        <option value="CRITICAL">Critical</option>
+                        <option value="WARNING">Warning</option>
+                        <option value="INFO">Info</option>
+                    </select>
+                </div>
+
+                <div class="alerts-container" id="alertsContainer">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Maintenance Section -->
+            <section id="maintenance" class="section">
+                <h2>Maintenance Schedule</h2>
+                
+                <div class="maintenance-container" id="maintenanceContainer">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 Smart Locomotive Health Monitor | Bangladesh Railways | AI-Powered Predictive Maintenance</p>
+        </footer>
+    </div>
+
+    <!-- Modal for Locomotive Details -->
+    <div id="locoModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/map.js"></script>
+</body>
+</html>

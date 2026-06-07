@@ -1,0 +1,34 @@
+loco_id,name,type,route,mileage,last_maintenance,status,owner,acquisition_year,current_location_lat,current_location_lon
+BR1001,Subarna Express,Diesel,Dhaka-Chittagong,145000,2025-01-15,ACTIVE,Bangladesh Railway,2010,23.7275,90.4086
+BR1002,Sundarban Express,Diesel,Dhaka-Khulna,234000,2024-12-20,ACTIVE,Bangladesh Railway,2005,22.8043,89.1680
+BR1003,Chattala Express,Diesel,Dhaka-Chittagong,89000,2025-02-10,ACTIVE,Bangladesh Railway,2015,21.4514,91.9679
+BR1004,Parabat Express,Diesel,Dhaka-Sylhet,156700,2024-11-05,ACTIVE,Bangladesh Railway,2012,24.9154,91.8746
+BR1005,Rangpur Express,Diesel,Dhaka-Rangpur,267800,2024-10-22,MAINTENANCE,Bangladesh Railway,2003,25.7439,89.2757
+BR1006,Padma Express,Diesel,Dhaka-Rajshahi,312450,2024-09-15,ACTIVE,Bangladesh Railway,2000,24.3745,88.6042
+BR1007,Turna Express,Diesel,Dhaka-Chittagong,45200,2025-01-28,ACTIVE,Bangladesh Railway,2018,23.6500,90.5000
+BR1008,Barendra Express,Diesel,Rajshahi-Chilahati,198650,2024-12-01,ACTIVE,Bangladesh Railway,2008,24.8465,89.3669
+BR1009,Kalni Express,Diesel,Dhaka-Sylhet,223400,2024-11-18,ACTIVE,Bangladesh Railway,2006,25.6217,88.6353
+BR1010,Ekota Express,Diesel,Dhaka-Panchagarh,102300,2025-02-05,ACTIVE,Bangladesh Railway,2016,24.3745,88.6042
+BR1011,Benapole Express,Diesel,Dhaka-Benapole,289700,2024-10-10,ACTIVE,Bangladesh Railway,2002,23.0128,88.1419
+BR1012,Upakul Express,Diesel,Dhaka-Noakhali,67850,2025-01-20,ACTIVE,Bangladesh Railway,2017,23.9500,90.4150
+BR1013,Mahanagar Express,Diesel,Dhaka-Chittagong,134500,2024-12-12,ACTIVE,Bangladesh Railway,2011,22.8043,89.1680
+BR1014,Rupsha Express,Diesel,Khulna-Rajshahi,245600,2024-09-08,MAINTENANCE,Bangladesh Railway,2004,23.1672,89.2143
+BR1015,Lalmoni Express,Diesel,Dhaka-Lalmonirhat,156200,2025-01-31,ACTIVE,Bangladesh Railway,2009,24.4105,88.9764
+BR1016,Tista Express,Diesel,Dhaka-Dewanganj,168900,2024-11-25,ACTIVE,Bangladesh Railway,2013,24.5796,88.2749
+BR1017,Meghna Express,Diesel,Chittagong-Chandpur,198700,2024-12-03,ACTIVE,Bangladesh Railway,2007,21.4514,91.9679
+BR1018,Shonar Bangla Express,Diesel,Dhaka-Chittagong,28300,2025-02-01,ACTIVE,Bangladesh Railway,2019,23.8371,90.3281
+BR1019,Agnibina Express,Diesel,Dhaka-Kishoreganj,256800,2024-10-14,ACTIVE,Bangladesh Railway,2001,23.9884,89.2494
+BR1020,Drutojan Express,Diesel,Dhaka-Panchagarh,312100,2024-08-22,INACTIVE,Bangladesh Railway,1999,24.8143,90.3521
+BR1021,Mahanagar Goduli Express,Diesel,Dhaka-Chittagong,98750,2025-01-08,ACTIVE,Bangladesh Railway,2014,22.3596,91.7623
+BR1022,Udayan Express,Diesel,Chittagong-Sylhet,145600,2024-11-30,ACTIVE,Bangladesh Railway,2007,24.9154,91.8746
+BR1023,Jayantika Express,Diesel,Dhaka-Sylhet,123400,2025-02-12,ACTIVE,Bangladesh Railway,2011,24.9154,91.8746
+BR1024,Panchagarh Express,Diesel,Dhaka-Panchagarh,298500,2024-10-05,MAINTENANCE,Bangladesh Railway,2004,26.3417,88.5542
+BR1025,Egarosindhur Express,Diesel,Dhaka-Kishoreganj,15600,2025-01-25,ACTIVE,Bangladesh Railway,2019,22.3596,91.7623
+BR1026,Kapotaksha Express,Diesel,Khulna-Rajshahi,87650,2024-12-18,ACTIVE,Bangladesh Railway,2013,23.7275,90.4086
+BR1027,Simanta Express,Diesel,Khulna-Chilahati,234800,2024-11-12,ACTIVE,Bangladesh Railway,2009,25.9167,89.4333
+BR1028,Brahmaputra Express,Diesel,Dhaka-Dewanganj,187650,2025-02-08,ACTIVE,Bangladesh Railway,2006,24.5796,88.2749
+BR1029,Madhumati Express,Diesel,Dhaka-Rajshahi,95600,2024-12-25,ACTIVE,Bangladesh Railway,2015,24.3745,88.6042
+BR1030,Paharika Express,Diesel,Dhaka-Panchagarh,267900,2024-10-28,ACTIVE,Bangladesh Railway,2008,26.3417,88.5542
+BR1031,Chitra Express,Diesel,Dhaka-Khulna,205000,2025-02-10,ACTIVE,Bangladesh Railway,2010,23.8103,90.4125
+BR1032,Sagarika Express,Diesel,Chittagong-Chandpur,175500,2025-03-01,ACTIVE,Bangladesh Railway,2012,21.4272,91.9754
+BR1033,Mohanagar Provati/Probal,Diesel,Dhaka-Chittagong,110000,2025-01-20,ACTIVE,Bangladesh Railway,2016,22.3569,91.7832

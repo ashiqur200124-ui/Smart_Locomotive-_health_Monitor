@@ -1,0 +1,320 @@
+---
+# Kubernetes Deployment Manifest for Smart Locomotive Health Monitor
+# Apply with: kubectl apply -f k8s/
+
+# ConfigMap for environment variables
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: locomotive-config
+  namespace: locomotive-monitor
+data:
+  FLASK_ENV: "production"
+  FLASK_APP: "app_v2.py"
+
+---
+# Secret for sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: locomotive-secrets
+  namespace: locomotive-monitor
+type: Opaque
+stringData:
+  JWT_SECRET_KEY: "your-secret-key-here"
+  DATABASE_URL: "postgresql://user:password@postgres:5432/locomotive_monitor"
+
+---
+# PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locomotive-postgres
+  namespace: locomotive-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: locomotive-postgres
+  template:
+    metadata:
+      labels:
+        app: locomotive-postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: locomotive
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: locomotive-secrets
+              key: JWT_SECRET_KEY
+        - name: POSTGRES_DB
+          value: locomotive_monitor
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U locomotive
+          initialDelaySeconds: 30
+          periodSeconds: 10
+      volumes:
+      - name: postgres-storage
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+
+---
+# Redis Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locomotive-redis
+  namespace: locomotive-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: locomotive-redis
+  template:
+    metadata:
+      labels:
+        app: locomotive-redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli
+            - ping
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locomotive-backend
+  namespace: locomotive-monitor
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: locomotive-backend
+  template:
+    metadata:
+      labels:
+        app: locomotive-backend
+    spec:
+      serviceAccountName: locomotive-sa
+      containers:
+      - name: backend
+        image: localhost:5000/locomotive-monitor:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+          name: http
+        env:
+        - name: FLASK_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: locomotive-config
+              key: FLASK_ENV
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: locomotive-secrets
+              key: DATABASE_URL
+        - name: JWT_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: locomotive-secrets
+              key: JWT_SECRET_KEY
+        - name: REDIS_URL
+          value: "redis://locomotive-redis:6379"
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: locomotive-backend
+  namespace: locomotive-monitor
+spec:
+  selector:
+    app: locomotive-backend
+  ports:
+  - port: 5000
+    targetPort: 5000
+    name: http
+  type: ClusterIP
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: locomotive-postgres
+  namespace: locomotive-monitor
+spec:
+  selector:
+    app: locomotive-postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP
+
+---
+# Redis Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: locomotive-redis
+  namespace: locomotive-monitor
+spec:
+  selector:
+    app: locomotive-redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP
+
+---
+# Ingress for external access
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: locomotive-ingress
+  namespace: locomotive-monitor
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: locomotive.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: locomotive-backend
+            port:
+              number: 5000
+
+---
+# HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: locomotive-backend-hpa
+  namespace: locomotive-monitor
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: locomotive-backend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# PersistentVolumeClaim for PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: locomotive-monitor
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard
+
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: locomotive-sa
+  namespace: locomotive-monitor
+
+---
+# Role
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: locomotive-role
+  namespace: locomotive-monitor
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services"]
+  verbs: ["get", "list", "watch"]
+
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: locomotive-rolebinding
+  namespace: locomotive-monitor
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: locomotive-role
+subjects:
+- kind: ServiceAccount
+  name: locomotive-sa
+  namespace: locomotive-monitor
