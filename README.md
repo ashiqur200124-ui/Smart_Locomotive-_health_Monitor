@@ -346,7 +346,7 @@ This project is developed for Bangladesh Railways. All rights reserved.
 ## 👥 Contributors
 
 - **Lead Developer & Architect**: Ashiqur Rahman
-- All work completed independently through command-driven development
+- Full-stack system design, development, and deployment
 
 ## 📧 Contact
 
