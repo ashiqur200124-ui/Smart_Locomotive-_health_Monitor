@@ -300,13 +300,14 @@ This project is part of Smart Locomotive Health Monitor system.
 ## 👥 Contributors
 
 - **Lead Developer & Architect**: Ashiqur Rahman
-- Full-stack system design, development, and deployment
+- All work completed independently through command-driven development
 
 ## 📧 Contact
 
 For questions or support:
-- email: support@bangladeshrailway.gov.bd
-- phone: +880-2-1234-5678
+- **Email**: ashiqcse1006@gmail.com
+- **Phone**: +8801533560773
+- **Developer**: Md. Ashiqur Rahman
 
 ## Version
 
