@@ -345,10 +345,8 @@ This project is developed for Bangladesh Railways. All rights reserved.
 
 ## 👥 Contributors
 
-- AI/ML Engineering Team
-- Railway Operations Specialists
-- Software Development Team
-- Data Science Department
+- **Lead Developer & Architect**: Ashiqur Rahman
+- All work completed independently through command-driven development
 
 ## 📧 Contact
 
@@ -358,6 +356,6 @@ For questions or support:
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: March 30, 2025  
+**Version**: 2.0.0  
+**Last Updated**: June 7, 2026  
 **Status**: Production Ready 🚀

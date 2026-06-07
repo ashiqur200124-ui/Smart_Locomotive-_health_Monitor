@@ -297,10 +297,22 @@ For issues or questions:
 
 This project is part of Smart Locomotive Health Monitor system.
 
+## 👥 Contributors
+
+- **Lead Developer & Architect**: Ashiqur Rahman
+- All work completed independently through command-driven development
+
+## 📧 Contact
+
+For questions or support:
+- email: support@bangladeshrailway.gov.bd
+- phone: +880-2-1234-5678
+
 ## Version
 
-Mobile App v1.0.0 - May 2026
-Backend Compatible: v1.0.0+
+**Version**: 2.0.0  
+**Last Updated**: June 7, 2026  
+**Status**: Production Ready 🚀
 
 ---
 
