@@ -7,6 +7,11 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List
 import json
+import os
+import smtplib
+import ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 class AlertSeverity(Enum):
     """Alert severity levels"""
@@ -85,8 +90,69 @@ class AlertManager:
         
         self.active_alerts[loco_id].append(alert)
         self.alert_history.append(alert)
-        
+        # Send email notification if configured
+        default_recipient = os.getenv('ALERT_DEFAULT_EMAIL')
+        if 'email' in self.notification_channels and default_recipient:
+            try:
+                subject = f"Alert: {alert.alert_type.value} - {alert.severity.value}"
+                body = (
+                    f"Locomotive: {loco_id}\n"
+                    f"Type: {alert.alert_type.value}\n"
+                    f"Severity: {alert.severity.value}\n"
+                    f"Message: {alert.message}\n"
+                    f"Component: {alert.component}\n"
+                    f"Action: {alert.action_required}\n"
+                    f"Timestamp: {alert.timestamp.isoformat()}\n"
+                )
+                self.send_email(default_recipient, subject, body)
+            except Exception as e:
+                print(f"Failed to send alert email: {e}")
+
         return alert
+
+    def send_email(self, to_address: str, subject: str, body: str) -> bool:
+        """Send an email using SMTP configured via environment variables.
+
+        Environment variables:
+        - SMTP_HOST
+        - SMTP_PORT
+        - SMTP_USER
+        - SMTP_PASS
+        - SMTP_USE_TLS (true/false)
+        - ALERT_DEFAULT_EMAIL (recipient, optional override)
+        """
+        smtp_host = os.getenv('SMTP_HOST')
+        smtp_port = int(os.getenv('SMTP_PORT', '587'))
+        smtp_user = os.getenv('SMTP_USER')
+        smtp_pass = os.getenv('SMTP_PASS')
+        use_tls = os.getenv('SMTP_USE_TLS', 'true').lower() in ('1', 'true', 'yes')
+
+        # If SMTP not configured, log the email to console instead
+        if not smtp_host or not smtp_user or not smtp_pass:
+            print("SMTP not configured. Email content below:")
+            print("To:", to_address)
+            print("Subject:", subject)
+            print(body)
+            return False
+
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = smtp_user
+            msg['To'] = to_address
+            msg['Subject'] = subject
+            msg.attach(MIMEText(body, 'plain'))
+
+            context = ssl.create_default_context()
+            server = smtplib.SMTP(smtp_host, smtp_port, timeout=10)
+            if use_tls:
+                server.starttls(context=context)
+            server.login(smtp_user, smtp_pass)
+            server.sendmail(smtp_user, to_address.split(','), msg.as_string())
+            server.quit()
+            return True
+        except Exception as e:
+            print(f"Error sending email: {e}")
+            return False
     
     def generate_alerts_from_risk_analysis(self, loco_id: str, risk_score: float, 
                                           component_risks: Dict, recommendations: List[str]) -> List[Alert]:

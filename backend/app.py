@@ -8,6 +8,7 @@ from flask_cors import CORS
 from datetime import datetime
 import csv
 import os
+import json
 
 # Import our custom modules
 import sys
@@ -205,6 +206,41 @@ def acknowledge_alert(loco_id, alert_id):
         'alert_id': alert_id,
         'message': 'Alert acknowledged' if success else 'Alert not found'
     })
+
+
+@app.route('/api/alerts/test', methods=['POST'])
+def send_test_alert():
+    """Send a test alert email to verify notification delivery.
+    JSON body: { "email": "you@example.com", "loco_id": "BR1001" }
+    """
+    try:
+        data = request.get_json() or {}
+        email = data.get('email') or os.getenv('ALERT_DEFAULT_EMAIL')
+        loco_id = data.get('loco_id', 'TEST_LOCO')
+
+        if not email:
+            return jsonify({'status': 'error', 'message': 'No email provided and ALERT_DEFAULT_EMAIL not set'}), 400
+
+        # Create a test alert
+        alert = alert_manager.create_alert(
+            loco_id,
+            AlertType.PREDICTIVE_WARNING,
+            AlertSeverity.INFO,
+            'This is a test alert to verify email notifications',
+            action_required='No action required - test'
+        )
+
+        # Send email explicitly
+        sent = False
+        try:
+            sent = alert_manager.send_email(email, f"Test Alert - {alert.alert_id}", json.dumps(alert.to_dict(), indent=2))
+        except Exception as e:
+            print(f"Error sending test email: {e}")
+
+        return jsonify({'status': 'success', 'email_sent': sent, 'alert': alert.to_dict()})
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/locations/<loco_id>', methods=['POST'])
 def get_support_locations(loco_id):
